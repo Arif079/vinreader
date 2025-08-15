@@ -297,11 +297,12 @@
             </div>
         </div>
     </div>
-
-    <!-- Dynamsoft Barcode Reader CDN -->
+<!-- Dynamsoft Barcode Reader CDN -->
 <script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.40/dist/dbr.js"></script>
 
 <script>
+window.addEventListener("load", function() {
+
     let scannerActive = false;
     let currentGeolocation = null;
     let scanHistory = [];
@@ -311,7 +312,6 @@
 
     // 🚀 PUT YOUR DYNAMSOFT LICENSE KEY HERE
     const DYNAMSOFT_LICENSE = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMTA0MzcyODYzLU1UQTBNemN5T0RZekxYZGxZaTFVY21saGJGQnliMm8iLCJtYWluU2VydmVyVVJMIjoiaHR0cHM6Ly9tZGxzLmR5bmFtc29mdG9ubGluZS5jb20iLCJvcmdhbml6YXRpb25JRCI6IjEwNDM3Mjg2MyIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbSIsImNoZWNrQ29kZSI6LTIwMTgzNTgxNzV9"; 
-    // If you leave it blank, trial prompt will appear
 
     document.addEventListener('DOMContentLoaded', function() {
         initTimeDisplay();
@@ -326,41 +326,45 @@
         });
     });
 
-
     async function startScanner() {
-    if (scannerActive) return;
+        if (scannerActive) return;
 
-    try {
-        Dynamsoft.BarcodeReader.engineResourcePath =
-            "https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.40/dist/";
-
-        if (DYNAMSOFT_LICENSE && DYNAMSOFT_LICENSE.trim() !== "") {
-            Dynamsoft.BarcodeReader.initLicense(DYNAMSOFT_LICENSE);
-        } else {
-            alert("⚠ No license key found. A trial popup will appear.");
-            Dynamsoft.BarcodeReader.initLicense(""); // triggers trial
-        }
-
-        reader = await Dynamsoft.BarcodeScanner.createInstance();
-        await reader.updateRuntimeSettings("vin128");
-
-        reader.onFrameRead = results => {
-            if (results.length > 0) {
-                let vinText = results[0].barcodeText;
-                handleScan(vinText);
+        try {
+            // Ensure the library exists
+            if (!Dynamsoft || !Dynamsoft.BarcodeReader) {
+                throw new Error("Dynamsoft library not loaded");
             }
-        };
 
-        await reader.show();
-        scannerActive = true;
-        document.getElementById('start-btn').disabled = true;
-        document.getElementById('stop-btn').disabled = false;
-    } catch (err) {
-        alert("Error starting scanner: " + err.message);
-        console.error(err);
+            // Resource path and license
+            Dynamsoft.BarcodeReader.engineResourcePath =
+                "https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.40/dist/";
+
+            if (DYNAMSOFT_LICENSE && DYNAMSOFT_LICENSE.trim() !== "") {
+                Dynamsoft.BarcodeReader.initLicense(DYNAMSOFT_LICENSE);
+            } else {
+                alert("⚠ No license key found. A trial popup will appear.");
+                Dynamsoft.BarcodeReader.initLicense(""); // triggers trial
+            }
+
+            reader = await Dynamsoft.BarcodeScanner.createInstance();
+            await reader.updateRuntimeSettings("vin128");
+
+            reader.onFrameRead = results => {
+                if (results.length > 0) {
+                    let vinText = results[0].barcodeText;
+                    handleScan(vinText);
+                }
+            };
+
+            await reader.show();
+            scannerActive = true;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = false;
+        } catch (err) {
+            alert("Error starting scanner: " + err.message);
+            console.error(err);
+        }
     }
-}
-
 
     async function stopScanner() {
         if (!scannerActive) return;
@@ -490,6 +494,9 @@
         marker.bindPopup(`Scanned VIN: ${vin}`).openPopup();
         markers.push(marker);
     }
+
+}); // end window.load
 </script>
+
       </body>
 </html>
