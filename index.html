@@ -1,487 +1,481 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIN-39 Barcode Scanner</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-        :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --accent-color: #3b82f6;
-            --dark-color: #1f2937;
-            --light-color: #f9fafb;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Barcode Reader & Generator</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+    /* Modern Web Design Standards */
+    :root {
+      --color-primary: #0891b2;
+      --color-background: #121212;
+      --color-surface: #1e1e1e;
+      --color-on-surface: #e0e0e0;
+      --color-accent: #06b6d4;
+      --border-radius: 12px;
+      --spacing-sm: 12px;
+      --spacing-md: 24px;
+      --spacing-lg: 48px;
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --color-background: #f9fafb;
+        --color-surface: #ffffff;
+        --color-on-surface: #1f2937;
+      }
+    }
 
-        body {
-            background-color: var(--light-color);
-            color: var(--dark-color);
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--accent-color);
-        }
+    body {
+      margin: 0;
+      background-color: var(--color-background);
+      color: var(--color-on-surface);
+      font-family: var(--font-family);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
+    header {
+      background: var(--color-surface);
+      padding: var(--spacing-md);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255 255 255 / 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      user-select: none;
+    }
 
-        .scanner-container {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-lg);
+      padding: var(--spacing-lg);
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
 
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+        padding: var(--spacing-md);
+        gap: var(--spacing-md);
+      }
+    }
 
-        .scanner-section {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+    section {
+      background: var(--color-surface);
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      padding: var(--spacing-lg);
+      display: flex;
+      flex-direction: column;
+      min-height: 400px;
+    }
 
-        .video-container {
-            position: relative;
-            width: 100%;
-            height: 300px;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            border: 2px solid var(--accent-color);
-        }
+    section h2 {
+      margin-top: 0;
+      margin-bottom: var(--spacing-md);
+      font-weight: 700;
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.75rem;
+    }
 
-        #scanner-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    button {
+      cursor: pointer;
+      background-color: var(--color-primary);
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
 
-        .scan-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            height: 100px;
-            border: 4px solid var(--success-color);
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            animation: pulse 2s infinite;
-        }
+    button:hover:not(:disabled) {
+      background-color: var(--color-accent);
+    }
 
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
-        }
+    button:disabled {
+      background-color: rgba(8, 145, 178, 0.5);
+      cursor: not-allowed;
+    }
 
-        .scan-overlay::before {
-            content: "Scan VIN-39 Barcode";
-            position: absolute;
-            top: -30px;
-            color: white;
-            font-weight: bold;
-            background-color: var(--primary-color);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
+    input[type="text"],
+    select {
+      font-size: 1rem;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #ccc;
+      width: 100%;
+      max-width: 100%;
+      margin-bottom: var(--spacing-md);
+      color: var(--color-on-surface);
+      background-color: #fff;
+      font-family: var(--font-family);
+      transition: border-color 0.3s ease;
+    }
 
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--color-primary);
+      outline: none;
+    }
 
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
-            flex-grow: 1;
-        }
+    label {
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: block;
+      color: var(--color-primary);
+    }
 
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
+    #generator svg {
+      max-width: 100%;
+      height: auto !important;
+      margin-top: var(--spacing-md);
+      border: 1px solid #888;
+      border-radius: 8px;
+      background: white;
+      padding: 12px;
+    }
 
-        .btn-primary:hover {
-            background-color: var(--secondary-color);
-        }
+    /* Barcode Reader Styles */
+    #reader-container {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
 
-        .btn-secondary {
-            background-color: var(--dark-color);
-            color: white;
-        }
+    #video-container {
+      position: relative;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      border: 1px solid #888;
+      background: black;
+      width: 100%;
+      height: 300px;
+      margin-bottom: var(--spacing-md);
+    }
 
-        .btn-secondary:hover {
-            opacity: 0.8;
-        }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
 
-        .scanned-data {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+    #scan-result {
+      font-weight: 700;
+      font-size: 1.2rem;
+      min-height: 44px;
+      padding: 8px;
+      background: rgba(6, 182, 212, 0.12);
+      border-radius: 8px;
+      color: var(--color-primary);
+      user-select: text;
+      word-break: break-all;
+    }
 
-        .history-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: var(--primary-color);
-        }
+    #upload-label {
+      display: inline-block;
+      margin-top: var(--spacing-md);
+      font-weight: 600;
+      color: var(--color-primary);
+      cursor: pointer;
+      user-select: none;
+    }
 
-        .history-items {
-            max-height: 300px;
-            overflow-y: auto;
-        }
+    #barcode-file-input {
+      display: none;
+    }
 
-        .history-item {
-            padding: 12px;
-            margin-bottom: 10px;
-            background-color: #f3f4f6;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .history-item .vin {
-            font-weight: bold;
-            font-family: monospace;
-            font-size: 16px;
-        }
-
-        .history-item .time {
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .location-display {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #e5e7eb;
-            border-radius: 5px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .location-display svg {
-            width: 16px;
-            height: 16px;
-            fill: var(--danger-color);
-        }
-
-        .map-container {
-            height: 400px;
-            width: 100%;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .results-display {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f3f4f6;
-            border-radius: 8px;
-        }
-
-        .results-title {
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-
-        .result-item {
-            margin-bottom: 5px;
-            display: flex;
-        }
-
-        .result-label {
-            font-weight: bold;
-            min-width: 100px;
-            color: #4b5563;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    .material-icons {
+      font-size: 1.5rem;
+      vertical-align: middle;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="logo">VIN-39 Scanner</div>
-        <div class="time-display" id="current-time"></div>
-    </header>
+  <header>
+    <span class="material-icons" aria-hidden="true">qr_code_scanner</span>&nbsp;Barcode Reader & Generator
+  </header>
+  <main>
+    <section id="generator" aria-label="Barcode Generator">
+      <h2><span class="material-icons" aria-hidden="true">qr_code</span> Generate Barcode</h2>
+      <form id="barcode-form" onsubmit="return false">
+        <label for="barcode-text">Text to encode</label>
+        <input id="barcode-text" type="text" autocomplete="off" placeholder="Enter text or numbers" required aria-required="true" />
+        <label for="barcode-type">Barcode Type</label>
+        <select id="barcode-type" aria-label="Barcode type selector">
+          <option value="CODE128" selected>Code 128</option>
+          <option value="EAN13">EAN-13</option>
+          <option value="EAN8">EAN-8</option>
+          <option value="UPC">UPC</option>
+          <option value="CODE39">Code 39</option>
+          <option value="ITF14">ITF-14</option>
+          <option value="MSI">MSI</option>
+          <option value="Pharmacode">Pharmacode</option>
+        </select>
+        <button id="generate-btn" type="submit" aria-label="Generate Barcode Button">
+          <span class="material-icons" aria-hidden="true">play_arrow</span> Generate
+        </button>
+        <button id="clear-btn" type="button" aria-label="Clear Barcode Button" style="margin-left: 12px; background-color: #bb1f1f;">
+          <span class="material-icons" aria-hidden="true">clear</span> Clear
+        </button>
+      </form>
+      <div id="barcode-output" aria-live="polite" aria-atomic="true" style="margin-top: 24px;"></div>
+    </section>
 
-    <div class="scanner-container">
-        <div class="main-content">
-            <div class="scanner-section">
-                <h2>Barcode Scanner</h2>
-                <div class="video-container">
-                    <video id="scanner-video" playsinline></video>
-                    <div class="scan-overlay"></div>
-                </div>
-                <div class="controls">
-                    <button id="start-btn" class="btn-primary">Start Scanner</button>
-                    <button id="stop-btn" class="btn-secondary">Stop Scanner</button>
-                </div>
-                <div class="manual-input">
-                <h3>Manual VIN Input</h3>
-                <input type="text" id="manual-vin-input" placeholder="Enter VIN here" maxlength="17" />
-                <button id="submit-vin-btn" class="btn-primary">Submit VIN</button>
-                </div>
-                <div class="results-display">
-                    <div class="results-title">Last Scan Result:</div>
-                    <div class="result-item">
-                        <div class="result-label">VIN:</div>
-                        <div id="vin-result">Waiting for scan...</div>
-                    </div>
-                    <div class="result-item">
-                        <div class="result-label">Time:</div>
-                        <div id="scan-time">--:--</div>
-                    </div>
-                </div>
-                <div class="location-display" id="location-display">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                    </svg>
-                    <span>Acquiring location...</span>
-                </div>
-            </div>
-
-            <div class="map-container" id="map"></div>
+    <section id="reader" aria-label="Barcode Reader">
+      <h2><span class="material-icons" aria-hidden="true">camera_alt</span> Scan Barcode</h2>
+      <div id="reader-container">
+        <div id="video-container" aria-live="polite" aria-atomic="true">
+          <div id="video-placeholder" style="color: #888; display: flex; justify-content: center; align-items: center; height: 100%;">
+            Camera video will appear here
+          </div>
+          <video id="scanner-video" autoplay muted playsinline></video>
         </div>
+        <button id="start-scan-btn" aria-label="Start scanning barcode" type="button" style="margin-top: 8px;">
+          <span class="material-icons" aria-hidden="true">videocam</span> Start Scanner
+        </button>
+        <button id="stop-scan-btn" aria-label="Stop scanning barcode" type="button" style="margin-top: 8px; display:none; background-color: #bb1f1f;">
+          <span class="material-icons" aria-hidden="true">stop</span> Stop Scanner
+        </button>
 
-        <div class="scanned-data">
-            <div class="history-title">Scan History</div>
-            <div class="history-items" id="history-items">
-                <!-- History items will be added here dynamically -->
-            </div>
-        </div>
-    </div>
+        <label for="barcode-file-input" id="upload-label" tabindex="0" role="button" aria-label="Upload barcode image to scan">
+          <span class="material-icons" aria-hidden="true">upload_file</span> Upload Image to Scan
+        </label>
+        <input type="file" id="barcode-file-input" accept="image/*" aria-describedby="upload-label" />
 
-    <script type="module">
-        import { BrowserMultiFormatReader } from 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.0.10/+esm';
-    
-        let scannerActive = false;
-        let videoStream = null;
-        let currentGeolocation = null;
-        let scanHistory = [];
-        let map;
-        let markers = [];
-        let barcodeReader;
-    
-        document.addEventListener('DOMContentLoaded', function() {
-          initTimeDisplay();
-          initMap();
-          requestLocation();
-    
-          document.getElementById('start-btn').addEventListener('click', startScanner);
-          document.getElementById('stop-btn').addEventListener('click', stopScanner);
-          document.getElementById('submit-vin-btn').addEventListener('click', manualVINSubmit);
-          document.getElementById('manual-vin-input').addEventListener('keypress', e => {
-            if (e.key === 'Enter') manualVINSubmit();
-          });
+        <div id="scan-result" aria-live="polite" aria-atomic="true" role="region" aria-label="Barcode scan result"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+  <script>
+    // Barcode Generator
+    const barcodeForm = document.getElementById('barcode-form');
+    const barcodeTextInput = document.getElementById('barcode-text');
+    const barcodeTypeSelect = document.getElementById('barcode-type');
+    const barcodeOutput = document.getElementById('barcode-output');
+    const generateBtn = document.getElementById('generate-btn');
+    const clearBtn = document.getElementById('clear-btn');
+
+    let svgElement;
+
+    function generateBarcode() {
+      const text = barcodeTextInput.value.trim();
+      const type = barcodeTypeSelect.value;
+
+      if (!text) {
+        barcodeOutput.innerHTML = '';
+        return;
+      }
+
+      barcodeOutput.innerHTML = '';
+      svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svgElement.setAttribute('aria-label', 'Generated barcode');
+      svgElement.setAttribute('role', 'img');
+      svgElement.style.maxWidth = '100%';
+      svgElement.style.height = 'auto';
+
+      barcodeOutput.appendChild(svgElement);
+
+      try {
+        JsBarcode(svgElement, text, {
+          format: type,
+          lineColor: "#000",
+          width: 2,
+          height: 100,
+          displayValue: true,
+          fontOptions: "bold",
+          margin: 10
         });
-    
-        function initTimeDisplay() {
-          updateTime();
-          setInterval(updateTime, 1000);
-        }
-    
-        function updateTime() {
-          const now = new Date();
-          const timeString = now.toLocaleTimeString('en-US', {
-            hour: '2-digit', minute: '2-digit', second: '2-digit'
-          });
-          document.getElementById('current-time').textContent = timeString;
-        }
-    
-        function initMap() {
-          map = L.map('map').setView([0, 0], 2);
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-          }).addTo(map);
-        }
-    
-        function requestLocation() {
-          if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-              pos => {
-                currentGeolocation = {
-                  lat: pos.coords.latitude,
-                  lng: pos.coords.longitude
-                };
-                updateLocationDisplay();
-                updateMapPosition();
-              },
-              err => {
-                console.error(err);
-                document.getElementById('location-display').innerHTML = `
-                  <span>Location unavailable: ${err.message}</span>
-                `;
-              },
-              { enableHighAccuracy: true }
-            );
-          } else {
-            document.getElementById('location-display').innerHTML = `
-              <span>Geolocation not supported</span>
-            `;
+      } catch (err) {
+        barcodeOutput.innerHTML = '<p style="color: #bb1f1f; font-weight: 700;">Error generating barcode: ' + err.message + '</p>';
+      }
+    }
+
+    generateBtn.addEventListener('click', generateBarcode);
+
+    clearBtn.addEventListener('click', () => {
+      barcodeTextInput.value = '';
+      barcodeOutput.innerHTML = '';
+      barcodeTextInput.focus();
+    });
+
+    // Barcode Reader with QuaggaJS
+    const video = document.getElementById('scanner-video');
+    const videoContainer = document.getElementById('video-container');
+    const startScanBtn = document.getElementById('start-scan-btn');
+    const stopScanBtn = document.getElementById('stop-scan-btn');
+    const scanResult = document.getElementById('scan-result');
+    const videoPlaceholder = document.getElementById('video-placeholder');
+    const barcodeFileInput = document.getElementById('barcode-file-input');
+
+    let scanning = false;
+
+    function startScanner() {
+      if (scanning) return;
+
+      scanResult.textContent = '';
+      videoPlaceholder.style.display = 'none';
+      video.style.display = 'block';
+
+      Quagga.init(
+        {
+          inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: videoContainer,
+            constraints: {
+              facingMode: "environment",
+              width: { min: 640 },
+              height: { min: 480 },
+            },
+          },
+          decoder: {
+            readers: [
+              "code_128_reader",
+              "ean_reader",
+              "ean_8_reader",
+              "code_39_reader",
+              "code_39_vin_reader",
+              "codabar_reader",
+              "upc_reader",
+              "upc_e_reader",
+              "i2of5_reader",
+              "2of5_reader",
+              "code_93_reader",
+            ],
+          },
+          locate: true,
+          numOfWorkers: navigator.hardwareConcurrency || 4,
+          frequency: 10,
+          singleChannel: false,
+          multiple: false,
+        },
+        function (err) {
+          if (err) {
+            scanResult.textContent = "Error starting scanner: " + err.message;
+            videoPlaceholder.style.display = 'flex';
+            video.style.display = 'none';
+            return;
           }
+          Quagga.start();
+          scanning = true;
+          startScanBtn.style.display = 'none';
+          stopScanBtn.style.display = 'inline-flex';
         }
-    
-        function updateLocationDisplay() {
-          if (currentGeolocation) {
-            document.getElementById('location-display').innerHTML = `
-              <span>${currentGeolocation.lat.toFixed(4)}, ${currentGeolocation.lng.toFixed(4)}</span>
-            `;
+      );
+
+      Quagga.onDetected(onDetectedHandler);
+    }
+
+    function stopScanner() {
+      if (!scanning) return;
+      Quagga.stop();
+      Quagga.offDetected(onDetectedHandler);
+      scanning = false;
+      startScanBtn.style.display = 'inline-flex';
+      stopScanBtn.style.display = 'none';
+      videoPlaceholder.style.display = 'flex';
+      video.style.display = 'none';
+    }
+
+    function onDetectedHandler(result) {
+      if (result && result.codeResult && result.codeResult.code) {
+        scanResult.textContent = 'Detected code: ' + result.codeResult.code;
+        // Optionally stop after first detection
+        stopScanner();
+      }
+    }
+
+    startScanBtn.addEventListener('click', () => {
+      startScanner();
+    });
+
+    stopScanBtn.addEventListener('click', () => {
+      stopScanner();
+    });
+
+    // Scan from image upload
+    barcodeFileInput.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      scanResult.textContent = '';
+      if (!file) return;
+
+      const img = document.createElement('img');
+      img.onload = function() {
+        Quagga.decodeSingle(
+          {
+            src: img.src,
+            numOfWorkers: 0,
+            inputStream: {
+              size: 800,
+            },
+            decoder: {
+              readers: [
+                "code_128_reader",
+                "ean_reader",
+                "ean_8_reader",
+                "code_39_reader",
+                "code_39_vin_reader",
+                "codabar_reader",
+                "upc_reader",
+                "upc_e_reader",
+                "i2of5_reader",
+                "2of5_reader",
+                "code_93_reader",
+              ],
+            }
+          },
+          function(result) {
+            if (result && result.codeResult) {
+              scanResult.textContent = 'Detected code from image: ' + result.codeResult.code;
+            } else {
+              scanResult.textContent = 'No barcode detected in image.';
+            }
           }
-        }
-    
-        function updateMapPosition() {
-          if (currentGeolocation) {
-            map.setView([currentGeolocation.lat, currentGeolocation.lng], 15);
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
-            const marker = L.marker([currentGeolocation.lat, currentGeolocation.lng]).addTo(map);
-            markers.push(marker);
-            marker.bindPopup("Current Location").openPopup();
-          }
-        }
-    
-        async function startScanner() {
-          if (scannerActive) return;
-    
-          const video = document.getElementById('scanner-video');
-          barcodeReader = new BrowserMultiFormatReader();
-    
-          try {
-            await barcodeReader.decodeFromVideoDevice(null, video, (result, err) => {
-              if (result) {
-                handleScan(result.getText());
-              }
-            });
-    
-            scannerActive = true;
-            document.getElementById('start-btn').disabled = true;
-            document.getElementById('stop-btn').disabled = false;
-          } catch (err) {
-            alert("Error starting scanner: " + err.message);
-          }
-        }
-    
-        function stopScanner() {
-          if (!scannerActive) return;
-    
-          if (barcodeReader) {
-            barcodeReader.reset();
-          }
-    
-          const video = document.getElementById('scanner-video');
-          video.srcObject = null;
-    
-          scannerActive = false;
-          document.getElementById('start-btn').disabled = false;
-          document.getElementById('stop-btn').disabled = true;
-        }
-    
-        function handleScan(vinText) {
-          if (!vinText || vinText.length < 10) return;
-    
-          const now = new Date();
-          const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    
-          document.getElementById('vin-result').textContent = vinText;
-          document.getElementById('scan-time').textContent = timeString;
-          addToHistory(vinText, now);
-          if (currentGeolocation) addScanMarker(vinText);
-        }
-    
-        function manualVINSubmit() {
-          const manualVin = document.getElementById('manual-vin-input').value.trim();
-          if (manualVin.length === 17) {
-            const now = new Date();
-            handleScan(manualVin);
-            document.getElementById('manual-vin-input').value = '';
-          } else {
-            alert('Please enter a valid 17-character VIN.');
-          }
-        }
-    
-        function addToHistory(vin, time) {
-          if (scanHistory.length > 0 && scanHistory[0].vin === vin) return;
-          scanHistory.unshift({ vin, time, location: currentGeolocation });
-          if (scanHistory.length > 10) scanHistory = scanHistory.slice(0, 10);
-          updateHistoryDisplay();
-        }
-    
-        function updateHistoryDisplay() {
-          const historyContainer = document.getElementById('history-items');
-          historyContainer.innerHTML = '';
-          scanHistory.forEach((item, index) => {
-            const el = document.createElement('div');
-            el.className = 'history-item';
-            const date = item.time.toLocaleDateString('en-US');
-            const time = item.time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            el.innerHTML = `
-              <div>
-                <div class="vin">${item.vin}</div>
-                <div class="time">${date} ${time}</div>
-              </div>
-              <button onclick="showScanDetails(${index})" class="btn-secondary" style="padding: 5px 10px; font-size: 12px;">Details</button>
-            `;
-            historyContainer.appendChild(el);
-          });
-        }
-    
-        window.showScanDetails = function(index) {
-          const item = scanHistory[index];
-          alert(`VIN: ${item.vin}\nTime: ${item.time.toString()}\nLocation: ${item.location ? `${item.location.lat}, ${item.location.lng}` : 'Unknown'}`);
-        };
-    
-        function addScanMarker(vin) {
-          const marker = L.marker([currentGeolocation.lat, currentGeolocation.lng]).addTo(map);
-          marker.bindPopup(`Scanned VIN: ${vin}`).openPopup();
-          markers.push(marker);
-        }
-      </script>
-      </body>
+        );
+      };
+      img.onerror = () => {
+        scanResult.textContent = 'Failed to load image for scanning.';
+      };
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+  </script>
+</body>
 </html>
+
