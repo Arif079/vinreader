@@ -246,7 +246,7 @@
                 <h2>Barcode Scanner</h2>
                 <div class="video-container">
                     <video id="scanner-video" playsinline></video>
-                    <div class="scan-overlay"></div>
+                    <div ></div>
                 </div>
                 <div class="controls">
                     <button id="start-btn" class="btn-primary">Start Scanner</button>
@@ -287,9 +287,8 @@
         </div>
     </div>
 
-      <script type="module">
-    import Quagga from 'https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js>';
-
+<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
+<script>
     let scannerActive = false;
     let currentGeolocation = null;
     let scanHistory = [];
@@ -297,196 +296,196 @@
     let markers = [];
 
     document.addEventListener('DOMContentLoaded', function () {
-      initTimeDisplay();
-      initMap();
-      requestLocation();
+        initTimeDisplay();
+        initMap();
+        requestLocation();
 
-      document.getElementById('start-btn').addEventListener('click', startScanner);
-      document.getElementById('stop-btn').addEventListener('click', stopScanner);
-      document.getElementById('submit-vin-btn').addEventListener('click', manualVINSubmit);
-      document.getElementById('manual-vin-input').addEventListener('keypress', e => {
-        if (e.key === 'Enter') manualVINSubmit();
-      });
+        document.getElementById('start-btn').addEventListener('click', startScanner);
+        document.getElementById('stop-btn').addEventListener('click', stopScanner);
+        document.getElementById('submit-vin-btn').addEventListener('click', manualVINSubmit);
+        document.getElementById('manual-vin-input').addEventListener('keypress', e => {
+            if (e.key === 'Enter') manualVINSubmit();
+        });
     });
 
     function initTimeDisplay() {
-      updateTime();
-      setInterval(updateTime, 1000);
+        updateTime();
+        setInterval(updateTime, 1000);
     }
 
     function updateTime() {
-      const now = new Date();
-      const timeString = now.toLocaleTimeString('en-US', {
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
-      });
-      document.getElementById('current-time').textContent = timeString;
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', {
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+        document.getElementById('current-time').textContent = timeString;
     }
 
     function initMap() {
-      map = L.map('map').setView([0, 0], 2);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
+        map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
     }
 
     function requestLocation() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          pos => {
-            currentGeolocation = {
-              lat: pos.coords.latitude,
-              lng: pos.coords.longitude
-            };
-            updateLocationDisplay();
-            updateMapPosition();
-          },
-          err => {
-            console.error(err);
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    currentGeolocation = {
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude
+                    };
+                    updateLocationDisplay();
+                    updateMapPosition();
+                },
+                err => {
+                    console.error(err);
+                    document.getElementById('location-display').innerHTML = `
+                        <span>Location unavailable: ${err.message}</span>
+                    `;
+                },
+                { enableHighAccuracy: true }
+            );
+        } else {
             document.getElementById('location-display').innerHTML = `
-              <span>Location unavailable: ${err.message}</span>
+                <span>Geolocation not supported</span>
             `;
-          },
-          { enableHighAccuracy: true }
-        );
-      } else {
-        document.getElementById('location-display').innerHTML = `
-          <span>Geolocation not supported</span>
-        `;
-      }
+        }
     }
 
     function updateLocationDisplay() {
-      if (currentGeolocation) {
-        document.getElementById('location-display').innerHTML = `
-          <span>${currentGeolocation.lat.toFixed(4)}, ${currentGeolocation.lng.toFixed(4)}</span>
-        `;
-      }
+        if (currentGeolocation) {
+            document.getElementById('location-display').innerHTML = `
+                <span>${currentGeolocation.lat.toFixed(4)}, ${currentGeolocation.lng.toFixed(4)}</span>
+            `;
+        }
     }
 
     function updateMapPosition() {
-      if (currentGeolocation) {
-        map.setView([currentGeolocation.lat, currentGeolocation.lng], 15);
-        markers.forEach(m => map.removeLayer(m));
-        markers = [];
-        const marker = L.marker([currentGeolocation.lat, currentGeolocation.lng]).addTo(map);
-        markers.push(marker);
-        marker.bindPopup("Current Location").openPopup();
-      }
+        if (currentGeolocation) {
+            map.setView([currentGeolocation.lat, currentGeolocation.lng], 15);
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            const marker = L.marker([currentGeolocation.lat, currentGeolocation.lng]).addTo(map);
+            markers.push(marker);
+            marker.bindPopup("Current Location").openPopup();
+        }
     }
 
     // ====== QuaggaJS Scanner ======
     function startScanner() {
-      if (scannerActive) return;
+        if (scannerActive) return;
 
-      Quagga.init({
-        inputStream: {
-          type: "LiveStream",
-          target: document.querySelector('#scanner-video'),
-          constraints: {
-            facingMode: "environment"
-          }
-        },
-        decoder: {
-          readers: ["code_128_reader"]
-        },
-        locate: true
-      }, function (err) {
-        if (err) {
-          alert("Error starting scanner: " + err);
-          return;
-        }
-        Quagga.start();
-        scannerActive = true;
-        document.getElementById('start-btn').disabled = true;
-        document.getElementById('stop-btn').disabled = false;
-      });
+        Quagga.init({
+            inputStream: {
+                type: "LiveStream",
+                target: document.querySelector('#scanner-video'),
+                constraints: {
+                    facingMode: "environment"
+                }
+            },
+            decoder: {
+                readers: ["code_128_reader"]
+            },
+            locate: true
+        }, function (err) {
+            if (err) {
+                alert("Error starting scanner: " + err);
+                return;
+            }
+            Quagga.start();
+            scannerActive = true;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = false;
+        });
 
-      Quagga.onDetected(data => {
-        if (data && data.codeResult && data.codeResult.code) {
-          const vinCode = data.codeResult.code;
-          handleScan(vinCode);
+        Quagga.onDetected(data => {
+            if (data && data.codeResult && data.codeResult.code) {
+                const vinCode = data.codeResult.code;
+                handleScan(vinCode);
 
-          // Auto-stop scanning after reading
-          Quagga.stop();
-          Quagga.offDetected();
-          scannerActive = false;
-          document.getElementById('start-btn').disabled = false;
-          document.getElementById('stop-btn').disabled = true;
-        }
-      });
+                // Auto-stop scanning after reading
+                Quagga.stop();
+                Quagga.offDetected();
+                scannerActive = false;
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('stop-btn').disabled = true;
+            }
+        });
     }
 
     function stopScanner() {
-      if (!scannerActive) return;
+        if (!scannerActive) return;
 
-      Quagga.stop();
-      Quagga.offDetected();
-      scannerActive = false;
-      document.getElementById('start-btn').disabled = false;
-      document.getElementById('stop-btn').disabled = true;
+        Quagga.stop();
+        Quagga.offDetected();
+        scannerActive = false;
+        document.getElementById('start-btn').disabled = false;
+        document.getElementById('stop-btn').disabled = true;
     }
 
     // ====== VIN Processing ======
     function handleScan(vinText) {
-      if (!vinText || vinText.length < 10) return;
+        if (!vinText || vinText.length < 10) return;
 
-      const now = new Date();
-      const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-      document.getElementById('vin-result').textContent = vinText;
-      document.getElementById('scan-time').textContent = timeString;
-      addToHistory(vinText, now);
-      if (currentGeolocation) addScanMarker(vinText);
+        document.getElementById('vin-result').textContent = vinText;
+        document.getElementById('scan-time').textContent = timeString;
+        addToHistory(vinText, now);
+        if (currentGeolocation) addScanMarker(vinText);
     }
 
     function manualVINSubmit() {
-      const manualVin = document.getElementById('manual-vin-input').value.trim();
-      if (manualVin.length === 17) {
-        const now = new Date();
-        handleScan(manualVin);
-        document.getElementById('manual-vin-input').value = '';
-      } else {
-        alert('Please enter a valid 17-character VIN.');
-      }
+        const manualVin = document.getElementById('manual-vin-input').value.trim();
+        if (manualVin.length === 17) {
+            const now = new Date();
+            handleScan(manualVin);
+            document.getElementById('manual-vin-input').value = '';
+        } else {
+            alert('Please enter a valid 17-character VIN.');
+        }
     }
 
     function addToHistory(vin, time) {
-      if (scanHistory.length > 0 && scanHistory[0].vin === vin) return;
-      scanHistory.unshift({ vin, time, location: currentGeolocation });
-      if (scanHistory.length > 10) scanHistory = scanHistory.slice(0, 10);
-      updateHistoryDisplay();
+        if (scanHistory.length > 0 && scanHistory[0].vin === vin) return;
+        scanHistory.unshift({ vin, time, location: currentGeolocation });
+        if (scanHistory.length > 10) scanHistory = scanHistory.slice(0, 10);
+        updateHistoryDisplay();
     }
 
     function updateHistoryDisplay() {
-      const historyContainer = document.getElementById('history-items');
-      historyContainer.innerHTML = '';
-      scanHistory.forEach((item, index) => {
-        const el = document.createElement('div');
-        el.className = 'history-item';
-        const date = item.time.toLocaleDateString('en-US');
-        const time = item.time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        el.innerHTML = `
-          <div>
-            <div class="vin">${item.vin}</div>
-            <div class="time">${date} ${time}</div>
-          </div>
-          <button onclick="showScanDetails(${index})" class="btn-secondary" style="padding: 5px 10px; font-size: 12px;">Details</button>
-        `;
-        historyContainer.appendChild(el);
-      });
+        const historyContainer = document.getElementById('history-items');
+        historyContainer.innerHTML = '';
+        scanHistory.forEach((item, index) => {
+            const el = document.createElement('div');
+            el.className = 'history-item';
+            const date = item.time.toLocaleDateString('en-US');
+            const time = item.time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            el.innerHTML = `
+                <div>
+                    <div class="vin">${item.vin}</div>
+                    <div class="time">${date} ${time}</div>
+                </div>
+                <button onclick="showScanDetails(${index})" class="btn-secondary" style="padding: 5px 10px; font-size: 12px;">Details</button>
+            `;
+            historyContainer.appendChild(el);
+        });
     }
 
     window.showScanDetails = function (index) {
-      const item = scanHistory[index];
-      alert(`VIN: ${item.vin}\nTime: ${item.time.toString()}\nLocation: ${item.location ? `${item.location.lat}, ${item.location.lng}` : 'Unknown'}`);
+        const item = scanHistory[index];
+        alert(`VIN: ${item.vin}\nTime: ${item.time.toString()}\nLocation: ${item.location ? `${item.location.lat}, ${item.location.lng}` : 'Unknown'}`);
     };
 
     function addScanMarker(vin) {
-      const marker = L.marker([currentGeolocation.lat, currentGeolocation.lng]).addTo(map);
-      marker.bindPopup(`Scanned VIN: ${vin}`).openPopup();
-      markers.push(marker);
+        const marker = L.marker([currentGeolocation.lat, currentGeolocation.lng]).addTo(map);
+        marker.bindPopup(`Scanned VIN: ${vin}`).openPopup();
+        markers.push(marker);
     }
-    </script>
+</script>
 
       </body>
 </html>
