@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIN-39 Barcode Scanner</title>
+    <title>Barcode Scanner</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -104,17 +104,6 @@
             100% { opacity: 0.7; }
         }
 
-        .scan-overlay::before {
-            content: "Scan VIN-39 Barcode";
-            position: absolute;
-            top: -30px;
-            color: white;
-            font-weight: bold;
-            background-color: var(--primary-color);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
 
         .controls {
             display: flex;
@@ -247,7 +236,7 @@
 </head>
 <body>
     <header>
-        <div class="logo">VIN-39 Scanner</div>
+        <div class="logo">Scanner</div>
         <div class="time-display" id="current-time"></div>
     </header>
 
