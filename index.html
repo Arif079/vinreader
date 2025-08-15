@@ -298,190 +298,186 @@
         </div>
     </div>
 
-    <script type="module">
-        import { BrowserMultiFormatReader } from 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.0.10/+esm';
-    
-        let scannerActive = false;
-        let videoStream = null;
-        let currentGeolocation = null;
-        let scanHistory = [];
-        let map;
-        let markers = [];
-        let barcodeReader;
-    
-        document.addEventListener('DOMContentLoaded', function() {
-          initTimeDisplay();
-          initMap();
-          requestLocation();
-    
-          document.getElementById('start-btn').addEventListener('click', startScanner);
-          document.getElementById('stop-btn').addEventListener('click', stopScanner);
-          document.getElementById('submit-vin-btn').addEventListener('click', manualVINSubmit);
-          document.getElementById('manual-vin-input').addEventListener('keypress', e => {
+    <!-- Dynamsoft Barcode Reader CDN -->
+<script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.40/dist/dbr.js"></script>
+
+<script>
+    let scannerActive = false;
+    let currentGeolocation = null;
+    let scanHistory = [];
+    let map;
+    let markers = [];
+    let reader;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initTimeDisplay();
+        initMap();
+        requestLocation();
+
+        document.getElementById('start-btn').addEventListener('click', startScanner);
+        document.getElementById('stop-btn').addEventListener('click', stopScanner);
+        document.getElementById('submit-vin-btn').addEventListener('click', manualVINSubmit);
+        document.getElementById('manual-vin-input').addEventListener('keypress', e => {
             if (e.key === 'Enter') manualVINSubmit();
-          });
         });
-    
-        function initTimeDisplay() {
-          updateTime();
-          setInterval(updateTime, 1000);
+    });
+
+    async function startScanner() {
+        if (scannerActive) return;
+
+        try {
+            Dynamsoft.DBR.BarcodeReader.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.40/dist/";
+            reader = await Dynamsoft.DBR.BarcodeScanner.createInstance();
+            await reader.updateRuntimeSettings("vin128"); // Use VIN Code128 preset if needed
+
+            reader.onFrameRead = results => {
+                if (results.length > 0) {
+                    let vinText = results[0].barcodeText;
+                    handleScan(vinText);
+                }
+            };
+
+            reader.onUnduplicatedRead = (txt, result) => {
+                console.log("Scanned: ", txt);
+            };
+
+            await reader.show();
+            scannerActive = true;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = false;
+        } catch (err) {
+            alert("Error starting scanner: " + err.message);
         }
-    
-        function updateTime() {
-          const now = new Date();
-          const timeString = now.toLocaleTimeString('en-US', {
+    }
+
+    async function stopScanner() {
+        if (!scannerActive) return;
+        if (reader) {
+            await reader.hide();
+            await reader.destroyContext();
+            reader = null;
+        }
+        scannerActive = false;
+        document.getElementById('start-btn').disabled = false;
+        document.getElementById('stop-btn').disabled = true;
+    }
+
+    function handleScan(vinText) {
+        if (!vinText || vinText.length < 10) return;
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        document.getElementById('vin-result').textContent = vinText;
+        document.getElementById('scan-time').textContent = timeString;
+        addToHistory(vinText, now);
+        if (currentGeolocation) addScanMarker(vinText);
+    }
+
+    function manualVINSubmit() {
+        const manualVin = document.getElementById('manual-vin-input').value.trim();
+        if (manualVin.length === 17) {
+            const now = new Date();
+            handleScan(manualVin);
+            document.getElementById('manual-vin-input').value = '';
+        } else {
+            alert('Please enter a valid 17-character VIN.');
+        }
+    }
+
+    function addToHistory(vin, time) {
+        if (scanHistory.length > 0 && scanHistory[0].vin === vin) return;
+        scanHistory.unshift({ vin, time, location: currentGeolocation });
+        if (scanHistory.length > 10) scanHistory = scanHistory.slice(0, 10);
+        updateHistoryDisplay();
+    }
+
+    function updateHistoryDisplay() {
+        const historyContainer = document.getElementById('history-items');
+        historyContainer.innerHTML = '';
+        scanHistory.forEach((item, index) => {
+            const el = document.createElement('div');
+            el.className = 'history-item';
+            const date = item.time.toLocaleDateString('en-US');
+            const time = item.time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            el.innerHTML = `
+                <div>
+                    <div class="vin">${item.vin}</div>
+                    <div class="time">${date} ${time}</div>
+                </div>
+                <button onclick="showScanDetails(${index})" class="btn-secondary" style="padding: 5px 10px; font-size: 12px;">Details</button>
+            `;
+            historyContainer.appendChild(el);
+        });
+    }
+
+    window.showScanDetails = function(index) {
+        const item = scanHistory[index];
+        alert(`VIN: ${item.vin}\nTime: ${item.time.toString()}\nLocation: ${item.location ? `${item.location.lat}, ${item.location.lng}` : 'Unknown'}`);
+    };
+
+    function initTimeDisplay() {
+        updateTime();
+        setInterval(updateTime, 1000);
+    }
+
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', {
             hour: '2-digit', minute: '2-digit', second: '2-digit'
-          });
-          document.getElementById('current-time').textContent = timeString;
-        }
-    
-        function initMap() {
-          map = L.map('map').setView([0, 0], 2);
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        });
+        document.getElementById('current-time').textContent = timeString;
+    }
+
+    function initMap() {
+        map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
-          }).addTo(map);
-        }
-    
-        function requestLocation() {
-          if (navigator.geolocation) {
+        }).addTo(map);
+    }
+
+    function requestLocation() {
+        if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-              pos => {
-                currentGeolocation = {
-                  lat: pos.coords.latitude,
-                  lng: pos.coords.longitude
-                };
-                updateLocationDisplay();
-                updateMapPosition();
-              },
-              err => {
-                console.error(err);
-                document.getElementById('location-display').innerHTML = `
-                  <span>Location unavailable: ${err.message}</span>
-                `;
-              },
-              { enableHighAccuracy: true }
+                pos => {
+                    currentGeolocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                    updateLocationDisplay();
+                    updateMapPosition();
+                },
+                err => {
+                    console.error(err);
+                    document.getElementById('location-display').innerHTML = `<span>Location unavailable: ${err.message}</span>`;
+                },
+                { enableHighAccuracy: true }
             );
-          } else {
-            document.getElementById('location-display').innerHTML = `
-              <span>Geolocation not supported</span>
-            `;
-          }
+        } else {
+            document.getElementById('location-display').innerHTML = `<span>Geolocation not supported</span>`;
         }
-    
-        function updateLocationDisplay() {
-          if (currentGeolocation) {
+    }
+
+    function updateLocationDisplay() {
+        if (currentGeolocation) {
             document.getElementById('location-display').innerHTML = `
-              <span>${currentGeolocation.lat.toFixed(4)}, ${currentGeolocation.lng.toFixed(4)}</span>
+                <span>${currentGeolocation.lat.toFixed(4)}, ${currentGeolocation.lng.toFixed(4)}</span>
             `;
-          }
         }
-    
-        function updateMapPosition() {
-          if (currentGeolocation) {
+    }
+
+    function updateMapPosition() {
+        if (currentGeolocation) {
             map.setView([currentGeolocation.lat, currentGeolocation.lng], 15);
             markers.forEach(m => map.removeLayer(m));
             markers = [];
             const marker = L.marker([currentGeolocation.lat, currentGeolocation.lng]).addTo(map);
             markers.push(marker);
             marker.bindPopup("Current Location").openPopup();
-          }
         }
-    
-        async function startScanner() {
-          if (scannerActive) return;
-    
-          const video = document.getElementById('scanner-video');
-          barcodeReader = new BrowserMultiFormatReader();
-    
-          try {
-            await barcodeReader.decodeFromVideoDevice(null, video, (result, err) => {
-              if (result) {
-                handleScan(result.getText());
-              }
-            });
-    
-            scannerActive = true;
-            document.getElementById('start-btn').disabled = true;
-            document.getElementById('stop-btn').disabled = false;
-          } catch (err) {
-            alert("Error starting scanner: " + err.message);
-          }
-        }
-    
-        function stopScanner() {
-          if (!scannerActive) return;
-    
-          if (barcodeReader) {
-            barcodeReader.reset();
-          }
-    
-          const video = document.getElementById('scanner-video');
-          video.srcObject = null;
-    
-          scannerActive = false;
-          document.getElementById('start-btn').disabled = false;
-          document.getElementById('stop-btn').disabled = true;
-        }
-    
-        function handleScan(vinText) {
-          if (!vinText || vinText.length < 10) return;
-    
-          const now = new Date();
-          const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    
-          document.getElementById('vin-result').textContent = vinText;
-          document.getElementById('scan-time').textContent = timeString;
-          addToHistory(vinText, now);
-          if (currentGeolocation) addScanMarker(vinText);
-        }
-    
-        function manualVINSubmit() {
-          const manualVin = document.getElementById('manual-vin-input').value.trim();
-          if (manualVin.length === 17) {
-            const now = new Date();
-            handleScan(manualVin);
-            document.getElementById('manual-vin-input').value = '';
-          } else {
-            alert('Please enter a valid 17-character VIN.');
-          }
-        }
-    
-        function addToHistory(vin, time) {
-          if (scanHistory.length > 0 && scanHistory[0].vin === vin) return;
-          scanHistory.unshift({ vin, time, location: currentGeolocation });
-          if (scanHistory.length > 10) scanHistory = scanHistory.slice(0, 10);
-          updateHistoryDisplay();
-        }
-    
-        function updateHistoryDisplay() {
-          const historyContainer = document.getElementById('history-items');
-          historyContainer.innerHTML = '';
-          scanHistory.forEach((item, index) => {
-            const el = document.createElement('div');
-            el.className = 'history-item';
-            const date = item.time.toLocaleDateString('en-US');
-            const time = item.time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            el.innerHTML = `
-              <div>
-                <div class="vin">${item.vin}</div>
-                <div class="time">${date} ${time}</div>
-              </div>
-              <button onclick="showScanDetails(${index})" class="btn-secondary" style="padding: 5px 10px; font-size: 12px;">Details</button>
-            `;
-            historyContainer.appendChild(el);
-          });
-        }
-    
-        window.showScanDetails = function(index) {
-          const item = scanHistory[index];
-          alert(`VIN: ${item.vin}\nTime: ${item.time.toString()}\nLocation: ${item.location ? `${item.location.lat}, ${item.location.lng}` : 'Unknown'}`);
-        };
-    
-        function addScanMarker(vin) {
-          const marker = L.marker([currentGeolocation.lat, currentGeolocation.lng]).addTo(map);
-          marker.bindPopup(`Scanned VIN: ${vin}`).openPopup();
-          markers.push(marker);
-        }
-      </script>
+    }
+
+    function addScanMarker(vin) {
+        const marker = L.marker([currentGeolocation.lat, currentGeolocation.lng]).addTo(map);
+        marker.bindPopup(`Scanned VIN: ${vin}`).openPopup();
+        markers.push(marker);
+    }
+</script>
       </body>
 </html>
