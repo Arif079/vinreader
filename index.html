@@ -327,6 +327,7 @@
 
         try {
             Dynamsoft.DBR.BarcodeReader.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.40/dist/";
+            Dynamsoft.BarcodeReader.initLicense("DLS2eyJoYW5kc2hha2VDb2RlIjoiMTA0MzcyODYzLU1UQTBNemN5T0RZekxYZGxZaTFVY21saGJGQnliMm8iLCJtYWluU2VydmVyVVJMIjoiaHR0cHM6Ly9tZGxzLmR5bmFtc29mdG9ubGluZS5jb20iLCJvcmdhbml6YXRpb25JRCI6IjEwNDM3Mjg2MyIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbSIsImNoZWNrQ29kZSI6LTIwMTgzNTgxNzV9");
             reader = await Dynamsoft.DBR.BarcodeScanner.createInstance();
             await reader.updateRuntimeSettings("vin128"); // Use VIN Code128 preset if needed
 
