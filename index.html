@@ -18,474 +18,52 @@
             --danger-color: #ef4444;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--light-color);
-            color: var(--dark-color);
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--accent-color);
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .scanner-container {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .scanner-section {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .video-container {
-            position: relative;
-            width: 100%;
-            height: 300px;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            border: 2px solid var(--accent-color);
-        }
-
-        #scanner-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .scan-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            height: 100px;
-            border: 4px solid var(--success-color);
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
-        }
-
-
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
-            flex-grow: 1;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--secondary-color);
-        }
-
-        .btn-secondary {
-            background-color: var(--dark-color);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            opacity: 0.8;
-        }
-
-        .scanned-data {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .history-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: var(--primary-color);
-        }
-
-        .history-items {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .history-item {
-            padding: 12px;
-            margin-bottom: 10px;
-            background-color: #f3f4f6;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .history-item .vin {
-            font-weight: bold;
-            font-family: monospace;
-            font-size: 16px;
-        }
-
-        .history-item .time {
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .location-display {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #e5e7eb;
-            border-radius: 5px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .location-display svg {
-            width: 16px;
-            height: 16px;
-            fill: var(--danger-color);
-        }
-
-        .map-container {
-            height: 400px;
-            width: 100%;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .results-display {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f3f4f6;
-            border-radius: 8px;
-        }
-
-        .results-title {
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-
-        .result-item {
-            margin-bottom: 5px;
-            display: flex;
-        }
-
-        .result-label {
-            font-weight: bold;
-            min-width: 100px;
-            color: #4b5563;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--light-color); color: var(--dark-color); padding: 20px; max-width: 1200px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--accent-color); }
+        .logo { font-size: 24px; font-weight: bold; color: var(--primary-color); }
+        .scanner-container { display: flex; flex-direction: column; gap: 30px; }
+        .main-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .scanner-section { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .video-container { position: relative; width: 100%; height: 300px; border-radius: 8px; overflow: hidden; margin-bottom: 20px; border: 2px solid var(--accent-color); }
+        .scan-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 100px; border: 4px solid var(--success-color); border-radius: 8px; display: flex; justify-content: center; align-items: center; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; }
+        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: all 0.2s; flex-grow: 1; }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: var(--secondary-color); }
+        .btn-secondary { background-color: var(--dark-color); color: white; }
+        .btn-secondary:hover { opacity: 0.8; }
+        .scanned-data { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .history-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: var(--primary-color); }
+        .history-items { max-height: 300px; overflow-y: auto; }
+        .history-item { padding: 12px; margin-bottom: 10px; background-color: #f3f4f6; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .history-item .vin { font-weight: bold; font-family: monospace; font-size: 16px; }
+        .history-item .time { font-size: 12px; color: #6b7280; }
+        .location-display { margin-top: 10px; padding: 10px; background-color: #e5e7eb; border-radius: 5px; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        .location-display svg { width: 16px; height: 16px; fill: var(--danger-color); }
+        .map-container { height: 400px; width: 100%; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .results-display { margin-top: 20px; padding: 15px; background-color: #f3f4f6; border-radius: 8px; }
+        .results-title { margin-bottom: 10px; font-weight: bold; }
+        .result-item { margin-bottom: 5px; display: flex; }
+        .result-label { font-weight: bold; min-width: 100px; color: #4b5563; }
+        @media (max-width: 768px) { .main-content { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">Scanner</div>
-        <div class="time-display" id="current-time"></div>
-    </header>
+<header>
+    <div class="logo">Scanner</div>
+    <div class="time-display" id="current-time"></div>
+</header>
 
-    <div class="scanner-container">
-        <div class="main-content">
-            <div class="scanner-section">
-                <h2>Barcode Scanner</h2>
-                <div class="video-container">
-                    <video id="scanner-video" playsinline></video>
-                    <div ></div>
-                </div>
-                <div class="controls">
-                    <button id="start-btn" class="btn-primary">Start Scanner</button>
-                    <button id="stop-btn" class="btn-secondary">Stop Scanner</button>
-                </div>
-                <div class="manual-input">
-                <h3>Manual VIN Input</h3>
-                <input type="text" id="manual-vin-input" placeholder="Enter VIN here" maxlength="17" />
-                <button id="submit-vin-btn" class="btn-primary">Submit VIN</button>
-                </div>
-                <div class="results-display">
-                    <div class="results-title">Last Scan Result:</div>
-                    <div class="result-item">
-                        <div class="result-label">VIN:</div>
-                        <div id="vin-result">Waiting for scan...</div>
-                    </div>
-                    <div class="result-item">
-                        <div class="result-label">Time:</div>
-                        <div id="scan-time">--:--</div>
-                    </div>
-                </div>
-                <div class="location-display" id="location-display">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                    </svg>
-                    <span>Acquiring location...</span>
-                </div>
+<div class="scanner-container">
+    <div class="main-content">
+        <div class="scanner-section">
+            <h2>Barcode Scanner</h2>
+            <div class="video-container">
+                <!-- Quagga will inject the video here -->
+                <div class="scan-overlay"></div>
             </div>
-
-            <div class="map-container" id="map"></div>
-        </div>
-
-        <div class="scanned-data">
-            <div class="history-title">Scan History</div>
-            <div class="history-items" id="history-items">
-                <!-- History items will be added here dynamically -->
-            </div>
-        </div>
-    </div>
-
-<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
-<script>
-    let scannerActive = false;
-    let currentGeolocation = null;
-    let scanHistory = [];
-    let map;
-    let markers = [];
-
-    document.addEventListener('DOMContentLoaded', function () {
-        initTimeDisplay();
-        initMap();
-        requestLocation();
-
-        document.getElementById('start-btn').addEventListener('click', startScanner);
-        document.getElementById('stop-btn').addEventListener('click', stopScanner);
-        document.getElementById('submit-vin-btn').addEventListener('click', manualVINSubmit);
-        document.getElementById('manual-vin-input').addEventListener('keypress', e => {
-            if (e.key === 'Enter') manualVINSubmit();
-        });
-    });
-
-    function initTimeDisplay() {
-        updateTime();
-        setInterval(updateTime, 1000);
-    }
-
-    function updateTime() {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('en-US', {
-            hour: '2-digit', minute: '2-digit', second: '2-digit'
-        });
-        document.getElementById('current-time').textContent = timeString;
-    }
-
-    function initMap() {
-        map = L.map('map').setView([0, 0], 2);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-    }
-
-    function requestLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                pos => {
-                    currentGeolocation = {
-                        lat: pos.coords.latitude,
-                        lng: pos.coords.longitude
-                    };
-                    updateLocationDisplay();
-                    updateMapPosition();
-                },
-                err => {
-                    console.error(err);
-                    document.getElementById('location-display').innerHTML = `
-                        <span>Location unavailable: ${err.message}</span>
-                    `;
-                },
-                { enableHighAccuracy: true }
-            );
-        } else {
-            document.getElementById('location-display').innerHTML = `
-                <span>Geolocation not supported</span>
-            `;
-        }
-    }
-
-    function updateLocationDisplay() {
-        if (currentGeolocation) {
-            document.getElementById('location-display').innerHTML = `
-                <span>${currentGeolocation.lat.toFixed(4)}, ${currentGeolocation.lng.toFixed(4)}</span>
-            `;
-        }
-    }
-
-    function updateMapPosition() {
-        if (currentGeolocation) {
-            map.setView([currentGeolocation.lat, currentGeolocation.lng], 15);
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
-            const marker = L.marker([currentGeolocation.lat, currentGeolocation.lng]).addTo(map);
-            markers.push(marker);
-            marker.bindPopup("Current Location").openPopup();
-        }
-    }
-
-    // ====== QuaggaJS Scanner ======
-    function startScanner() {
-        if (scannerActive) return;
-
-        Quagga.init({
-            inputStream: {
-                type: "LiveStream",
-                target: document.querySelector('#scanner-video'),
-                constraints: {
-                    facingMode: "environment"
-                }
-            },
-            decoder: {
-                readers: ["code_128_reader"]
-            },
-            locate: true
-        }, function (err) {
-            if (err) {
-                alert("Error starting scanner: " + err);
-                return;
-            }
-            Quagga.start();
-            scannerActive = true;
-            document.getElementById('start-btn').disabled = true;
-            document.getElementById('stop-btn').disabled = false;
-        });
-
-        Quagga.onDetected(data => {
-            if (data && data.codeResult && data.codeResult.code) {
-                const vinCode = data.codeResult.code;
-                handleScan(vinCode);
-
-                // Auto-stop scanning after reading
-                Quagga.stop();
-                Quagga.offDetected();
-                scannerActive = false;
-                document.getElementById('start-btn').disabled = false;
-                document.getElementById('stop-btn').disabled = true;
-            }
-        });
-    }
-
-    function stopScanner() {
-        if (!scannerActive) return;
-
-        Quagga.stop();
-        Quagga.offDetected();
-        scannerActive = false;
-        document.getElementById('start-btn').disabled = false;
-        document.getElementById('stop-btn').disabled = true;
-    }
-
-    // ====== VIN Processing ======
-    function handleScan(vinText) {
-        if (!vinText || vinText.length < 10) return;
-
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-        document.getElementById('vin-result').textContent = vinText;
-        document.getElementById('scan-time').textContent = timeString;
-        addToHistory(vinText, now);
-        if (currentGeolocation) addScanMarker(vinText);
-    }
-
-    function manualVINSubmit() {
-        const manualVin = document.getElementById('manual-vin-input').value.trim();
-        if (manualVin.length === 17) {
-            const now = new Date();
-            handleScan(manualVin);
-            document.getElementById('manual-vin-input').value = '';
-        } else {
-            alert('Please enter a valid 17-character VIN.');
-        }
-    }
-
-    function addToHistory(vin, time) {
-        if (scanHistory.length > 0 && scanHistory[0].vin === vin) return;
-        scanHistory.unshift({ vin, time, location: currentGeolocation });
-        if (scanHistory.length > 10) scanHistory = scanHistory.slice(0, 10);
-        updateHistoryDisplay();
-    }
-
-    function updateHistoryDisplay() {
-        const historyContainer = document.getElementById('history-items');
-        historyContainer.innerHTML = '';
-        scanHistory.forEach((item, index) => {
-            const el = document.createElement('div');
-            el.className = 'history-item';
-            const date = item.time.toLocaleDateString('en-US');
-            const time = item.time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            el.innerHTML = `
-                <div>
-                    <div class="vin">${item.vin}</div>
-                    <div class="time">${date} ${time}</div>
-                </div>
-                <button onclick="showScanDetails(${index})" class="btn-secondary" style="padding: 5px 10px; font-size: 12px;">Details</button>
-            `;
-            historyContainer.appendChild(el);
-        });
-    }
-
-    window.showScanDetails = function (index) {
-        const item = scanHistory[index];
-        alert(`VIN: ${item.vin}\nTime: ${item.time.toString()}\nLocation: ${item.location ? `${item.location.lat}, ${item.location.lng}` : 'Unknown'}`);
-    };
-
-    function addScanMarker(vin) {
-        const marker = L.marker([currentGeolocation.lat, currentGeolocation.lng]).addTo(map);
-        marker.bindPopup(`Scanned VIN: ${vin}`).openPopup();
-        markers.push(marker);
-    }
-</script>
-
-      </body>
-</html>
+            <div class="controls">
+                <button id="start-btn" class="btn-primary">Start Scanner</button>
+                <butt
