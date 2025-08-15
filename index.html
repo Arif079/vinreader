@@ -3,67 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner</title>
+    <title>VIN-39 Barcode Scanner & Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --accent-color: #3b82f6;
-            --dark-color: #1f2937;
-            --light-color: #f9fafb;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--light-color); color: var(--dark-color); padding: 20px; max-width: 1200px; margin: 0 auto; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--accent-color); }
-        .logo { font-size: 24px; font-weight: bold; color: var(--primary-color); }
-        .scanner-container { display: flex; flex-direction: column; gap: 30px; }
-        .main-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .scanner-section { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-        .video-container { position: relative; width: 100%; height: 300px; border-radius: 8px; overflow: hidden; margin-bottom: 20px; border: 2px solid var(--accent-color); }
-        .scan-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 100px; border: 4px solid var(--success-color); border-radius: 8px; display: flex; justify-content: center; align-items: center; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
-        .controls { display: flex; gap: 10px; margin-bottom: 20px; }
-        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: all 0.2s; flex-grow: 1; }
-        .btn-primary { background-color: var(--primary-color); color: white; }
-        .btn-primary:hover { background-color: var(--secondary-color); }
-        .btn-secondary { background-color: var(--dark-color); color: white; }
-        .btn-secondary:hover { opacity: 0.8; }
-        .scanned-data { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-        .history-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: var(--primary-color); }
-        .history-items { max-height: 300px; overflow-y: auto; }
-        .history-item { padding: 12px; margin-bottom: 10px; background-color: #f3f4f6; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .history-item .vin { font-weight: bold; font-family: monospace; font-size: 16px; }
-        .history-item .time { font-size: 12px; color: #6b7280; }
-        .location-display { margin-top: 10px; padding: 10px; background-color: #e5e7eb; border-radius: 5px; font-size: 14px; display: flex; align-items: center; gap: 5px; }
-        .location-display svg { width: 16px; height: 16px; fill: var(--danger-color); }
-        .map-container { height: 400px; width: 100%; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-        .results-display { margin-top: 20px; padding: 15px; background-color: #f3f4f6; border-radius: 8px; }
-        .results-title { margin-bottom: 10px; font-weight: bold; }
-        .result-item { margin-bottom: 5px; display: flex; }
-        .result-label { font-weight: bold; min-width: 100px; color: #4b5563; }
-        @media (max-width: 768px) { .main-content { grid-template-columns: 1fr; } }
+        h1, h2 {
+            text-align: center;
+            margin: 15px 0;
+        }
+        .video-container {
+            width: 640px;
+            height: 480px;
+            background: #000;
+            margin: 0 auto;
+            position: relative;
+        }
+        .controls {
+            margin: 15px auto;
+            width: 640px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-primary, .btn-secondary {
+            padding: 10px 18px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .btn-primary {
+            background: #28a745;
+            color: #fff;
+        }
+        .btn-secondary {
+            background: #dc3545;
+            color: #fff;
+        }
+        #map {
+            width: 90%;
+            height: 400px;
+            margin: 20px auto;
+            border: 2px solid #333;
+            border-radius: 5px;
+        }
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: #fff;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background: #333;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
-<header>
-    <div class="logo">Scanner</div>
-    <div class="time-display" id="current-time"></div>
-</header>
 
-<div class="scanner-container">
-    <div class="main-content">
-        <div class="scanner-section">
-            <h2>Barcode Scanner</h2>
-            <div class="video-container">
-                <!-- Quagga will inject the video here -->
-                <div class="scan-overlay"></div>
-            </div>
-            <div class="controls">
-                <button id="start-btn" class="btn-primary">Start Scanner</button>
-                <butt
+    <h1>VIN-39 Barcode Scanner (Desktop/Laptop)</h1>
+
+    <div class="video-container" id="video-container">
+        <!-- Quagga will inject video here -->
+    </div>
+
+    <div class="controls">
+        <button id="start-btn" class="btn-primary">Start Scanner</button>
+        <button id="stop-btn" class="btn-secondary" disabled>Stop Scanner</button>
+    </div>
+
+    <h2>Scan History</h2>
+    <table id="history-table">
+        <thead>
+            <tr>
+                <th>VIN Code</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h2>Map</h2>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@0.0.10/dist/quagga.min.js"></script>
+    <script>
+        let scannerActive = false;
+        let map, marker;
+
+        async function checkCameraAccess() {
+            try {
+                await navigator.mediaDevices.getUserMedia({ video: true });
+                console.log("Camera access granted.");
+                return true;
+            } catch (err) {
+                console.error("Camera access denied:", err);
+                alert("Please allow camera access to scan barcodes.");
+                return false;
+            }
+        }
+
+        function startScanner() {
+            if (scannerActive) return;
+
+            Quagga.init({
+                inputStream: {
+                    type: "LiveStream",
+                    target: document.querySelector('#video-container'),
+                    constraints: {
+                        width: 640,
+                        height: 480
+                    }
+                },
+                decoder: {
+                    readers: ["code_128_reader"] // VIN Code 128
+                },
+                locate: true
+            }, function (err) {
+                if (err) {
+                    console.error("Quagga init error:", err);
+                    alert("Error starting scanner. Check console for details.");
+                    return;
+                }
+                Quagga.start();
+                scannerActive = true;
+                document.getElementById('start-btn').disabled = true;
+                document.getElementById('stop-btn').disabled = false;
+                console.log("Scanner started.");
+            });
+
+            Quagga.onDetected(data => {
+                if (data && data.codeResult && data.codeResult.code) {
+                    const vinCode = data.codeResult.code;
+                    console.log("Detected VIN:", vinCode);
+                    addHistory(vinCode);
+                    updateMap();
+                    stopScanner();
+                }
+            });
+        }
+
+        function stopScanner() {
+            if (!scannerActive) return;
+            Quagga.stop();
+            Quagga.offDetected();
+            scannerActive = false;
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('stop-btn').disabled = true;
+            console.log("Scanner stopped.");
+        }
+
+        function addHistory(vin) {
+            const tableBody = document.querySelector("#history-table tbody");
+            const row = document.createElement("tr");
+            const vinCell = document.createElement("td");
+            const timeCell = document.createElement("td");
+            vinCell.textContent = vin;
+            timeCell.textContent = new Date().toLocaleString();
+            row.appendChild(vinCell);
+            row.appendChild(timeCell);
+            tableBody.prepend(row);
+        }
+
+        function updateMap() {
+            if (!map) {
+                map = L.map('map').setView([0, 0], 2);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+            }
+            navigator.geolocation.getCurrentPosition(pos => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                if (marker) {
+                    marker.setLatLng([lat, lon]);
+                } else {
+                    marker = L.marker([lat, lon]).addTo(map);
+                }
+                map.setView([lat, lon], 14);
+            }, err => {
+                console.error("Geolocation error:", err);
+                alert("Unable to fetch location.");
+            });
+        }
+
+        document.getElementById('start-btn').addEventListener('click', async () => {
+            const hasAccess = await checkCameraAccess();
+            if (hasAccess) startScanner();
+        });
+        document.getElementById('stop-btn').addEventListener('click', stopScanner);
+    </script>
+
+</body>
+</html>
