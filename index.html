@@ -309,6 +309,10 @@
     let markers = [];
     let reader;
 
+    // 🚀 PUT YOUR DYNAMSOFT LICENSE KEY HERE
+    const DYNAMSOFT_LICENSE = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMTA0MzcyODYzLU1UQTBNemN5T0RZekxYZGxZaTFVY21saGJGQnliMm8iLCJtYWluU2VydmVyVVJMIjoiaHR0cHM6Ly9tZGxzLmR5bmFtc29mdG9ubGluZS5jb20iLCJvcmdhbml6YXRpb25JRCI6IjEwNDM3Mjg2MyIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbSIsImNoZWNrQ29kZSI6LTIwMTgzNTgxNzV9"; 
+    // If you leave it blank, trial prompt will appear
+
     document.addEventListener('DOMContentLoaded', function() {
         initTimeDisplay();
         initMap();
@@ -326,10 +330,19 @@
         if (scannerActive) return;
 
         try {
-            Dynamsoft.DBR.BarcodeReader.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.40/dist/";
-            Dynamsoft.BarcodeReader.initLicense("DLS2eyJoYW5kc2hha2VDb2RlIjoiMTA0MzcyODYzLU1UQTBNemN5T0RZekxYZGxZaTFVY21saGJGQnliMm8iLCJtYWluU2VydmVyVVJMIjoiaHR0cHM6Ly9tZGxzLmR5bmFtc29mdG9ubGluZS5jb20iLCJvcmdhbml6YXRpb25JRCI6IjEwNDM3Mjg2MyIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbSIsImNoZWNrQ29kZSI6LTIwMTgzNTgxNzV9");
+            // ✅ Correct API usage for version 9.6.40
+            Dynamsoft.DBR.BarcodeReader.engineResourcePath =
+                "https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.40/dist/";
+
+            if (DYNAMSOFT_LICENSE && DYNAMSOFT_LICENSE.trim() !== "") {
+                Dynamsoft.DBR.BarcodeReader.initLicense(DYNAMSOFT_LICENSE);
+            } else {
+                alert("⚠ No license key found. A trial popup will appear.");
+                Dynamsoft.DBR.BarcodeReader.initLicense(""); // triggers trial
+            }
+
             reader = await Dynamsoft.DBR.BarcodeScanner.createInstance();
-            await reader.updateRuntimeSettings("vin128"); // Use VIN Code128 preset if needed
+            await reader.updateRuntimeSettings("vin128"); // VIN Code128 preset
 
             reader.onFrameRead = results => {
                 if (results.length > 0) {
@@ -338,16 +351,13 @@
                 }
             };
 
-            reader.onUnduplicatedRead = (txt, result) => {
-                console.log("Scanned: ", txt);
-            };
-
             await reader.show();
             scannerActive = true;
             document.getElementById('start-btn').disabled = true;
             document.getElementById('stop-btn').disabled = false;
         } catch (err) {
             alert("Error starting scanner: " + err.message);
+            console.error(err);
         }
     }
 
